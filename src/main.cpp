@@ -6,7 +6,7 @@
 
 int main() {
     std::cout << "=========================================================\n";
-    std::cout << " BASELINE SYSTEM (Array-based queue)\n";
+    std::cout << " BASELINE SYSTEM (Array-based queue, paper kiosk)\n";
     std::cout << "=========================================================\n";
 
     BaselineSystem baseline;
@@ -16,14 +16,29 @@ int main() {
     }
     std::cout << "6 tickets enqueued. Queue size: " << baseline.size() << "\n";
 
-    std::cout << "\nStudent with Ticket #3 leaves the premises and cancels\n";
-    std::cout << "from their phone (a 'ghost ticket' being cleaned up)...\n";
+    std::cout << "\nStudent with Ticket #3 decides not to come anymore.\n";
+    std::cout << "The queue is NOT updated in any way:\n";
+    std::cout << "Queue size is still: " << baseline.size() << "\n";
 
-    bool cancelled = baseline.cancelTicket(3);
-    std::cout << "Cancelled: " << (cancelled ? "yes" : "no")
-               << " | Queue size now: " << baseline.size() << "\n";
-    std::cout << "(Internally: every ticket after #3 was shifted down one\n";
-    std::cout << "position in the array -- an O(N) operation.)\n";
+    std::cout << "\n--- Staff now begins calling tickets in order ---\n";
+    while (!baseline.isEmpty()) {
+        Ticket next = baseline.dequeue();
+        if (next.ticketNumber == 3) {
+            std::cout << "Calling Ticket #3 (" << next.studentId << ")... no response.\n";
+        } else {
+            std::cout << "Serving Ticket #" << next.ticketNumber << " (" << next.studentId << ")\n";
+        }
+    }
+
+    BaselineSystem baselineForComparison;
+    for (int i = 1; i <= 6; i++) {
+        baselineForComparison.enqueue(Ticket(i, "Student" + std::to_string(i),
+                                              "token-" + std::to_string(i), "Sticker Registration"));
+    }
+    bool cancelled = baselineForComparison.cancelTicket(3);
+    std::cout << "Manually removed Ticket #3: " << (cancelled ? "yes" : "no") << "\n";
+    std::cout << "(Internally: the list was scanned to find #3 -- O(N) -- then\n";
+    std::cout << "every ticket after it was shifted down one position -- O(N).)\n";
 
     std::cout << "\n\n=========================================================\n";
     std::cout << " OPTIMIZED SYSTEM (Doubly Linked List + Hash Map)\n";
@@ -36,7 +51,7 @@ int main() {
     }
     std::cout << "6 tickets enqueued. Queue size: " << optimized.size() << "\n";
 
-    std::cout << "\nStudent with token \"token-3\" cancels from their phone...\n";
+    std::cout << "\nStudent with ticket \"3\" cancels from their phone.\n";
 
     cancelled = optimized.cancelTicket("token-3");
     std::cout << "Cancelled: " << (cancelled ? "yes" : "no")
@@ -51,7 +66,7 @@ int main() {
         std::cout << "  Serving Ticket #" << next.ticketNumber
                    << " (" << next.studentId << ")\n";
     }
-    std::cout << "\nNote: Ticket #3 does not appear above -- it was cancelled.\n";
+    std::cout << "\nNote: Ticket #3 does not appear above.\n";
 
     return 0;
 }
